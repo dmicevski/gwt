@@ -39,17 +39,22 @@ public final class Date_CustomFieldSerializer extends
 
   public static Date instantiate(SerializationStreamReader streamReader)
       throws SerializationException {
-	long time = streamReader.readLong();
+    long time = streamReader.readLong(); //GMT
+    
+    long offset = (new Date(time).getTimezoneOffset() * 60 * 1000);
 	
     // The instance date is in UTC format so add back the client's timezone offset back to get it into GMT format.
-    Date date = new Date(time + (new Date(time).getTimezoneOffset() * 60 * 1000)); 
+    Date date = new Date(time + offset);  //AUS
+
     return date;
   }
 
   public static void serialize(SerializationStreamWriter streamWriter,
       Date instance) throws SerializationException {
+    long offset = (instance.getTimezoneOffset() * 60 * 1000) * 2L; // Need to double the offset
+	  
     // The instance date is in GMT format so subtract the client's timezone offset to get it into UTC format.
-    streamWriter.writeLong(instance.getTime() - (instance.getTimezoneOffset() * 60 * 1000));
+    streamWriter.writeLong(instance.getTime() - offset); //GMT
   }
 
   @Override
